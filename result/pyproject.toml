@@ -1,0 +1,117 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "farsi-textutils"
+version = "1.0.0"
+description = "Persian (Farsi) text utilities: normalisation, tokenisation, stemming, spelling, identifier validation, transliteration, fake data and corpus tooling."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "farsi-textutils contributors" }]
+keywords = ["persian", "farsi", "nlp", "text", "normalization", "tokenizer", "stemmer"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Persian",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+dependencies = [
+    "loguru>=0.7.2",
+    "typer>=0.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+]
+docs = ["mkdocs-material>=9.5"]
+
+[project.scripts]
+farsi-textutils = "farsi_textutils.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/i4147/nlp"
+Source = "https://github.com/i4147/nlp"
+
+[tool.hatch.build.targets.wheel]
+packages = ["farsi_textutils"]
+
+[tool.pytest.ini_options]
+addopts = "-q --doctest-modules"
+testpaths = ["tests", "farsi_textutils"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["farsi_textutils", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "SIM", # simplify
+    "RUF", # ruff specific
+    "D",   # pydocstyle
+    "ANN", # annotations
+    "C4",  # comprehensions
+    "PT",  # pytest style
+    "NPY", # numpy
+    "TID", # tidy imports
+]
+ignore = [
+    "D203",   # conflicts with D211
+    "D213",   # conflicts with D212
+    "ANN401", # Any is fine for **kwargs forwarding
+    "B008",   # typer uses function calls in defaults by design
+    "RUF001", # Persian strings legitimately mix ZWNJ / Persian letters
+    "RUF002", # ... and so do the docstrings
+    "RUF003", # ... and comments
+    "TID252", # relative imports keep the data package internal
+    "UP040",  # PEP 695 aliases would break running the code on Python 3.11
+    "UP047",  # PEP 695 generics, same reason
+    "D105",   # magic methods are covered by the class docstring
+    "D107",   # ditto for __init__ (Google style documents args once)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D103", "ANN201", "ANN001", "PT011"]
+"farsi_textutils/data/*" = ["E501", "D100"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = false
+disallow_untyped_decorators = false
+exclude = ["farsi_textutils/data/"]
+
+[[tool.mypy.overrides]]
+module = ["farsi_textutils.data.*"]
+ignore_errors = true
+
+[tool.coverage.run]
+source = ["farsi_textutils"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+]
