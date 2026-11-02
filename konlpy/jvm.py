@@ -1,0 +1,59 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+
+import logging
+import os
+import sys
+
+try:
+    import jpype
+except ImportError:
+    pass
+
+from konlpy import utils
+
+
+def init_jvm(jvmpath=None, max_heap_size=1024):
+
+    if jpype.isJVMStarted():
+        logging.warning("JVM is already running. Do not init twice!")
+        return
+
+    folder_suffix = [
+        "{0}",
+        "{0}{1}bin",
+        "{0}{1}*",
+        "{0}{1}jhannanum-0.8.4.jar",
+        "{0}{1}kkma-2.0.jar",
+        "{0}{1}aho-corasick.jar",
+        "{0}{1}shineware-common-1.0.jar",
+        "{0}{1}shineware-ds-1.0.jar",
+        "{0}{1}komoran-3.0.jar",
+        "{0}{1}snakeyaml-1.12.jar",
+        "{0}{1}scala-library-2.12.3.jar",
+        "{0}{1}open-korean-text-2.1.0.jar",
+        "{0}{1}twitter-text-1.14.7.jar",
+        "{0}{1}*",
+    ]
+
+    javadir = "%s%sjava" % (utils.installpath, os.sep)
+
+    args = [javadir, os.sep]
+    classpath = [f.format(*args) for f in folder_suffix]
+
+    jvmpath = jvmpath or jpype.getDefaultJVMPath()
+
+    if sys.platform == "darwin" and jvmpath.find("1.8.0") > 0 and jvmpath.endswith("libjvm.dylib"):
+        jvmpath = "%s/lib/jli/libjli.dylib" % jvmpath.split("/lib/")[0]
+
+    if jvmpath:
+        jpype.startJVM(
+            jvmpath,
+            "-Dfile.encoding=UTF8",
+            "-ea",
+            "-Xmx{}m".format(max_heap_size),
+            classpath=classpath,
+            convertStrings=True,
+        )
+    else:
+        raise ValueError("Please specify the JVM path.")
